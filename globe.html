@@ -8,27 +8,12 @@
         <script>
             const width = 960;
             const height = 500;
-            // var request = '71.105.49.34'
-            // const url='http://api.hackertarget.com/geoip/?q=71.105.49.34' ;
-            // var response = {}
-            // var latitude
-            // var longitude
-            // Http.open("GET", url);
-            // Http.send();
-            // Http.onreadystatechange=(e)=>{
-            //   var data=Http.responseText;
-            //
-            //   var jsonResponse = JSON.parse(data);
-            //   console.log(jsonResponse)
-            //   console.log (data)
-            //   latitude = jsonResponse.lat
-            //   longitude = jsonResponse.lon
-            // }
           	const config = {
               speed: 0.005,
               verticalTilt: -15,
               horizontalTilt: 0
             }
+
             let locations = [];
             const svg = d3.select('svg')
                 .attr('width', width).attr('height', height);
@@ -37,57 +22,141 @@
             const initialScale = projection.scale();
             const path = d3.geoPath().projection(projection);
             const center = [width/2, height/2];
-
-			var worldData;
-
-			loadData();
-            setTimeout(function (){
-				drawGraticule();
-				drawGlobe();
-				enableRotation();
-			}, 200);
-
-
-			function loadData()
-			{
-			// REQUEST DATA
-				d3.json('https://gist.githubusercontent.com/mbostock/4090846/raw/d534aba169207548a8a3d670c9c2cc719ff05c47/world-110m.json', function(err, json) {
-				  worldData = json;
-				})
-
-				d3.json('location.json', function(err, json) {
-				  locations = json;
-				})
-			}
-
-			function GetRandomHex()
-			{
-				var num;
-
-				num = Math.floor(Math.random() * 16);
-				return num.toString();
-			}
-
-			function GetRandomColor()
-			{
-				return '#' + GetRandomHex() + GetRandomHex() + GetRandomHex();
-			}
-
-
-			function drawGlobe() {
-				svg.selectAll(".segment")
-					.data(topojson.feature(worldData, worldData.objects.countries).features)
-					.enter().append("path")
-					.attr("class", "segment")
-					.attr("d", path)
-					.style("stroke", "#888")
-					.style("stroke-width", "1px")
-					.style("fill", (d, i) => '#e5e5e5')
-					.style("opacity", ".6");
-
+            var worldData;
+            var latitude1
+            var longitude1
+            var ips
+            var dummy = []
+            // var ipList = setInterval(getIps, 100)
+            // function getIps(){
+            //   var Http = new XMLHttpRequest();
+            //   var ips = {}
+            //   var url='https://u4uujrathb.execute-api.us-east-2.amazonaws.com/test/newtest';
+            //   var response = {}
+            //
+            //   Http.open("GET", url, false);
+            //
+            //   Http.onreadystatechange=function(){
+            //     var jsonResponse = JSON.parse(Http.responseText);
+            //     ips = jsonResponse.Items
+            //   }
+            //     Http.send();
+            //   }
+            dummmmy();
+            function dummmmy(){
+              d3.json('dummy.json', function(err, json) {
+      				  dummy = json;
+      				})
             }
 
-            function drawGraticule() {
+      			loadData();
+
+            var myVar = setInterval(locationMarker, 2000);
+            function locationMarker(){
+
+              for(var i= 0; i < dummy.length; i++){
+                var Http = new XMLHttpRequest();
+                var ip = dummy[i].ip.S
+                var url='http://ip-api.com/json/' + ip ;
+                Http.open("GET", url);
+                Http.send();
+                Http.onreadystatechange=(e)=>{
+                  var data=Http.responseText;
+                  var jsonResponse = JSON.parse(data);
+                  latitude1 = jsonResponse.lat
+                  longitude1 = jsonResponse.lon
+
+                  for(var i = 0; i < locations.length; i++){
+                    if (locations[i].latitude == latitude1 && locations[i].longitude == longitude1){
+                      null
+                    } else {
+                      locations.push({"latitude": latitude1, "longitude": longitude1} );
+                    }
+                  }
+                }
+              }
+            }
+
+            setTimeout(function (){
+      				drawGraticule();
+      				drawGlobe();
+      				enableRotation();
+      			}, 200);
+
+
+      			function loadData()
+      			{
+
+      			// REQUEST DATA
+      				d3.json('https://gist.githubusercontent.com/mbostock/4090846/raw/d534aba169207548a8a3d670c9c2cc719ff05c47/world-110m.json', function(err, json) {
+      				  worldData = json;
+      				})
+
+      				d3.json('location.json', function(err, json) {
+      				  locations = json;
+      				})
+
+
+      			}
+
+            // function loadLocations(){
+              // const Http = new XMLHttpRequest();
+              // var request = '71.105.49.34'
+              // const url='http://ip-api.com/json/71.105.49.34' ;
+              // var response = {}
+              // var latitude
+              // var longitude
+              // Http.open("GET", url);
+              // Http.send();
+              // Http.onreadystatechange=(e)=>{
+              //   var data=Http.responseText;
+              //   var jsonResponse = JSON.parse(data);
+              //   console.log(jsonResponse)
+              //   console.log (data)
+              //   latitude = jsonResponse.lat
+              //   longitude = jsonResponse.lon
+
+                // d3.json('location.json', function(err, json) {
+        				//   locations = json;
+        				// })
+                // var newLocations = []
+                // for(var i = 0; i < locationsData.length; i++){
+                //   if (locationsData[i].latitude == latitude && locationsData[i].longitude == longitude){
+                //     null
+                //   } else {
+                //     newLocations.push({"latitude": lat, "longitude": lon} );
+                //   }
+                // }
+              // }
+            // }
+      			function GetRandomHex()
+      			{
+      				var num;
+
+      				num = Math.floor(Math.random() * 16);
+      				return num.toString();
+      			}
+
+      			function GetRandomColor()
+      			{
+      				return '#' + GetRandomHex() + GetRandomHex() + GetRandomHex();
+      			}
+
+
+      			function drawGlobe() {
+      				svg.selectAll(".segment")
+      					.data(topojson.feature(worldData, worldData.objects.countries).features)
+      					.enter().append("path")
+      					.attr("class", "segment")
+      					.attr("d", path)
+      					.style("stroke", "#888")
+      					.style("stroke-width", "1px")
+      					.style("fill", (d, i) => '#e5e5e5')
+      					.style("opacity", ".6");
+
+              }
+
+              function drawGraticule() {
                 const graticule = d3.geoGraticule()
                     .step([10, 10]);
 
@@ -97,41 +166,22 @@
                     .attr("d", path)
                     .style("fill", "#fff")
                     .style("stroke", "#ccc");
-            }
+              }
 
-            function enableRotation() {
+              function enableRotation() {
                 d3.timer(function (elapsed) {
                     projection.rotate([config.speed * elapsed - 120, config.verticalTilt, config.horizontalTilt]);
                     svg.selectAll("path").attr("d", path);
                     drawMarkers();
                 });
-            }
+              }
 
-    			function random()
-    			{
-    				return Math.random();
-    			}
+        			function random()
+        			{
+        				return Math.random();
+        			}
 
-            function drawMarkers() {
-
-
-              // const Http = new XMLHttpRequest();
-              // var request = '71.105.49.34'
-              // const url='http://api.hackertarget.com/geoip/?q=71.105.49.34' ;
-              // var response = {}
-              // var latitude
-              // var longitude
-              // Http.open("GET", url);
-              // Http.send();
-              // Http.onreadystatechange=(e)=>{
-              //   var data=Http.responseText;
-              //
-              //   var jsonResponse = JSON.parse(data);
-              //   console.log(jsonResponse)
-              //   console.log (data)
-              //   latitude = jsonResponse.lat
-              //   longitude = jsonResponse.lon
-
+              function drawMarkers() {
                 const markers = markerGroup.selectAll('circle').data(locations);
 
                 markers
@@ -148,32 +198,32 @@
                     .attr('r', 4);
 
 
-				        // locations.push( {"latitude": latitude, "longitude": longitude} );
+
 
                 markerGroup.each(function () {
                     this.parentNode.appendChild(this);
                 });
-            }
+              }
 
-			function update()
-			{
-				svg.selectAll(".segment")
-					.data(topojson.feature(worldData, worldData.objects.countries).features)
-					.attr("class", "segment")
-					.attr("d", path)
-					.style("fill", (d, i) => GetRandomColor())
+        			function update()
+        			{
+        				svg.selectAll(".segment")
+        					.data(topojson.feature(worldData, worldData.objects.countries).features)
+        					.attr("class", "segment")
+        					.attr("d", path)
+        					.style("fill", (d, i) => GetRandomColor())
 
 
-/*
-				svg.selectAll(".segment")
-					.data(topojson.feature(worldData, worldData.objects.countries).features)
-					.attr("class", "segment")
-					.attr("d", path)
-					.style("fill", (d, i) => GetRandomColor())
-*/
-			}
+        /*
+        				svg.selectAll(".segment")
+        					.data(topojson.feature(worldData, worldData.objects.countries).features)
+        					.attr("class", "segment")
+        					.attr("d", path)
+        					.style("fill", (d, i) => GetRandomColor())
+        */
+        			}
 
-			window.setInterval(update, 100);
+			        window.setInterval(update, 100);
         </script>
     </body>
 </html>
