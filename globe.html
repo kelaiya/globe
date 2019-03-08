@@ -27,21 +27,21 @@
             var longitude1
             var ips
             var dummy = []
-            // var ipList = setInterval(getIps, 100)
-            // function getIps(){
-            //   var Http = new XMLHttpRequest();
-            //   var ips = {}
-            //   var url='https://u4uujrathb.execute-api.us-east-2.amazonaws.com/test/newtest';
-            //   var response = {}
-            //
-            //   Http.open("GET", url, false);
-            //
-            //   Http.onreadystatechange=function(){
-            //     var jsonResponse = JSON.parse(Http.responseText);
-            //     ips = jsonResponse.Items
-            //   }
-            //     Http.send();
-            //   }
+            var ipList = setInterval(getIps, 100)
+            function getIps(){
+              var Http = new XMLHttpRequest();
+              var ips = {}
+              var url='https://u4uujrathb.execute-api.us-east-2.amazonaws.com/test/newtest';
+              var response = {}
+
+              Http.open("GET", url, false);
+
+              Http.onreadystatechange=function(){
+                var jsonResponse = JSON.parse(Http.responseText);
+                console.log(jsonResponse.Items)
+              }
+                Http.send();
+              }
             dummmmy();
             function dummmmy(){
               d3.json('dummy.json', function(err, json) {
