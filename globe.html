@@ -108,7 +108,8 @@ function FadeInTheme() {
 			setTimeout("SkipDemo()", 300);
 			function SkipDemo()
 			{
-				StartDemo();
+          if (debug)
+				    StartDemo();
 			}
 
 			function StartDemo()
