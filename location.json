@@ -1,8 +1,3 @@
 [
-    {"latitude": 22, "longitude": 88},
-    {"latitude": 20.61315, "longitude": 38.37723},
-    {"latitude": 30.61315, "longitude": 38.37723},
-    {"latitude": 40.61315, "longitude": 38.37723},
-    {"latitude": 50.61315, "longitude": 38.37723},
-    {"latitude": 60.61315, "longitude": 38.37723}
+    {"latitude": 22, "longitude": 88}
 ]

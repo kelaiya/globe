@@ -1,0 +1,49 @@
+<html>
+
+<script>
+
+var audio = new Audio('theme.mp3');
+var NewVolume = 0;
+audio.load();
+
+
+function PlayTheme() {
+	audio.play();
+}
+
+function FadeIn()
+{
+	if (NewVolume>0.4) return;
+
+	NewVolume += 0.0001;
+	audio.volume = NewVolume;
+
+//	console.log(NewVolume);
+}
+
+function FadeInTheme() {
+	audio.play();
+	setInterval("FadeIn()", 20);
+}
+
+function Start() {
+	try {
+		audio.volume = 0;
+		audio.play();
+	}
+	catch (err) {
+	}
+}
+
+Start()
+setTimeout("FadeInTheme()", 1000);
+
+</script>
+
+<input type="button" value='play' onclick="PlayTheme()"><br>
+&nbsp;<br>
+<input type="button" value='stop' onclick="audio.pause()"><br>
+&nbsp;<br>
+<input type="button" value='FadeIn' onclick="FadeInTheme()"><br>
+
+</html>
