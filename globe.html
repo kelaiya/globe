@@ -1,11 +1,11 @@
 
 <html>
 <style>
-body {  margins: 0px; }
+body {  margins: 0px; } 
 </style>
 
     <body bgcolor="#7f8b96" topmargin="0" leftmargin="0" >
-		<div id="buttons">
+		<div id="buttons"> 
 		<input type="button" value="start" id="start" onclick="StartDemo();document.getElementById('buttons').style.display='none'">&nbsp;
 		<input type="button" value="skip"  id="skip" onclick="SkipDemo();document.getElementById('buttons').style.display='none'">
 		<input type="button" value="Spin Fast"   onclick="config.speed *= 2">
@@ -13,9 +13,9 @@ body {  margins: 0px; }
 	<div align="center">
         <svg style="background: #7f8b96"></svg>
 	</div>
-
+		
 <script>
-</script>
+</script>		
         <script src="d3.v4.min.js"></script>
         <script src="topojson.v1.min.js"></script>
         <script>
@@ -43,7 +43,7 @@ body {  margins: 0px; }
             var projection = d3.geoOrthographic()
 					.scale(330)
 					.translate([width/2, height/2-10]);
-
+					
             const initialScale = projection.scale();
             var path = d3.geoPath().projection(projection);
             const center = [width/2, window.innerHeight/2];
@@ -98,18 +98,26 @@ function FadeInTheme() {
 			var CountryColors = Array();
 
 			loadData();
-/*            setTimeout(function (){
+/*            setTimeout(function (){ 
 				drawGraticule();
 				drawGlobe();
-				enableRotation();
+				enableRotation();    
 			}, 200);
-*/
+*/			
 
-			setTimeout("SkipDemo()", 300);
+			if (debug)
+				setTimeout("SkipDemo()", 300);
+				
 			function SkipDemo()
 			{
-          if (debug)
-				    StartDemo();
+				audio.volume = NewVolume;
+				drawGraticule();
+				drawGlobe();
+				enableRotation();    
+
+				window.setInterval(update, 100);
+//				window.setInterval(GetLogins, 100);
+				GetLogins();
 			}
 
 			function StartDemo()
@@ -119,13 +127,13 @@ function FadeInTheme() {
 					FadeInTheme();
 				drawGraticule();
 				drawGlobe();
-				enableRotation();
+				enableRotation();    
 
 				window.setInterval(update, 100);
-//				window.setInterval(GetLogins, 100);
-				GetLogins();
+				window.setInterval(GetLogins, 500);
+//				GetLogins();
 			}
-
+			
 			function loadData()
 			{
 			// REQUEST DATA
@@ -133,7 +141,7 @@ function FadeInTheme() {
 				  worldData = json;
 				})
 
-/*
+/*				
 				d3.json('locations.json', function(err, json) {
 				  locations= [];
 				})
@@ -143,28 +151,28 @@ function FadeInTheme() {
 					ocean = topojson.feature(topo, topo.objects.ocean)
 				})
 			}
-
+			
 			function GetRandomHex()
 			{
 				var num;
-
+				
 				num = Math.floor(Math.random() * 16);
 				return num.toString(16);
 			}
-
+			
 			function GetHex(val)
 			{
 				val = Math.floor(val);
 				return val.toString(16);
 			}
-
+			
 			function GetRandomColor()
 			{
 				return '#' + GetRandomHex() + GetRandomHex() + GetRandomHex();
 			}
 
 
-			function drawGlobe() {
+			function drawGlobe() {  
 				projection = d3.geoOrthographic()
 					.scale(Scale)
 					.translate([width/2, height/2-10]);
@@ -181,19 +189,19 @@ function FadeInTheme() {
 					.style("opacity", ".8")
 					.call(function(d){
 						var NumContinents = d._groups[0].length;
-
+						
 						for (var i=0; i<NumContinents; i++)
 							CountryColors[i] = [0, 128 + getRandomInt(40) - 20, 128 + getRandomInt(40) - 20, 128 + getRandomInt(40) - 20];
-
+							
 //						console.log(CountryColors);
 					});
-
+                   
             }
-
+			
             function drawGraticule() {
 				if (!showingGraticule)
 					return;
-
+					
                 const graticule = d3.geoGraticule()
                     .step([10, 10]);
 
@@ -216,26 +224,26 @@ function FadeInTheme() {
 
 					if (!lastElapsed)
 						lastElapsed = elapsed;
-
-					distanceRotated += (config.speed * (elapsed - lastElapsed));
+						
+					distanceRotated += (config.speed * (elapsed - lastElapsed));	
 					lastElapsed = elapsed;
-					//elapsed
-
+					//elapsed					
+					
 //					console.log((distanceRotated - 600) % 360)
 					gCurrentView = (distanceRotated) % 360;
-
+					
                     projection.rotate([(distanceRotated - 600) % 360, config.verticalTilt, config.horizontalTilt]);
                     svg.selectAll("path").attr("d", path);
-
+					
                     drawMarkers();
                 });
-            }
-
+            }        
+			
 			function random()
 			{
 				return Math.random();
 			}
-
+			
 			function getRandomInt(Range)
 			{
 				return Math.floor(Math.random()*Range);
@@ -243,11 +251,11 @@ function FadeInTheme() {
 
             function drawMarkers() {
 				if (AnimPhase<2) return;
-
+				
 				RealCurrentView = 360-gCurrentView - 180 + 60;
 				RealCurrentView = (RealCurrentView + 360) % 360;
 //				console.log(RealCurrentView);
-
+				
                 const markers = markerGroup.selectAll('image')
                     .data(locations);
                 markers
@@ -265,7 +273,7 @@ function FadeInTheme() {
 							//special case:
 							if (RealCurrentView>270)
 								RealCurrentView -= 360;
-
+							
 							if (Math.abs(d.longitude - RealCurrentView)<90)
 								return 1.0;
 							return 0.1;
@@ -279,11 +287,11 @@ function FadeInTheme() {
 
 //				locations.push( {"longitude" : random()*360-180, "latitude" : random()*180 - 90} );
 
-
+				
                 markerGroup.each(function () {
                     this.parentNode.appendChild(this);
                 });
-
+				
             }
 
 
@@ -292,7 +300,7 @@ function FadeInTheme() {
 /*
             function drawMarkers() {
 				if (AnimPhase<2) return;
-
+				
                 const markers = markerGroup.selectAll('circle')
                     .data(locations);
                 markers
@@ -316,47 +324,47 @@ function FadeInTheme() {
 								d.AnimCycle++;
 							d.ticks++;
 							return d.r;
-						} else
+						} else 
 							return d.r;
 					});
 
 
 //				locations.push( {"longitude" : random()*360-180, "latitude" : random()*180 - 90} );
-
+				
                 markerGroup.each(function () {
                     this.parentNode.appendChild(this);
                 });
             }
-*/
-
+*/			
+			
 			function GetLandColor()
 			{
 				var H = GetHex(LandColor);
-
+				
 				return "#" + H + H + H;
 			}
-
+			
 			function GetGraticuleColor()
 			{
 				var H = GetHex(Math.floor(255 - (255-LandColor)/3));
-
+				
 				return "#" + H + H + H;
 			}
-
+			
 			function ComputeFinalCountryColor(c)
 			{
 				var Transition = c[0];
 				var R, G, B;
-
+				
 				if (c[0]<.99)
 					c[0] += 0.02;
-
+					
 				R = 128 * (1.0 - Transition) + Transition * c[1];
 				G = 128 * (1.0 - Transition) + Transition * c[2];
 				B = 128 * (1.0 - Transition) + Transition * c[3];
 				return "#" + GetHex(R) + GetHex(G) + GetHex(B);
 			}
-
+			
 			function update()
 			{
                 const graticule = d3.geoGraticule()
@@ -377,13 +385,13 @@ function FadeInTheme() {
                     .datum(graticule)
                     .attr("d", path)
                     .style("stroke", GetGraticuleColor())
-*/
+*/		
 				if (showingOcean) {
 					var R, G, B, OceanColor;
-
+					
 					if (OceanIntensity<1.0)
 						OceanIntensity += 0.003;
-
+						
 					R = 255 * (1.0-OceanIntensity) + 127 * OceanIntensity;
 					G = 255 * (1.0-OceanIntensity) + 178 * OceanIntensity;
 					B = 255 * (1.0-OceanIntensity) + 224 * OceanIntensity;
@@ -399,7 +407,7 @@ function FadeInTheme() {
 						.style("fill", OceanColor)
 
 				}
-
+					
 				switch (AnimPhase) {
 					case 1 :
 							svg.selectAll(".segment")
@@ -408,20 +416,20 @@ function FadeInTheme() {
 								.style("stroke", "#fff")
 								.attr("d", path)
 								.style("fill", (d, i) => GetLandColor())
-
+							
 							ticks++;
 							ticks %= Reducer;
-
+							
 							if (LandColor>128) {
 								if (!ticks || Reducer==1) {
 									LandColor -= 1;
-
+									
 									if (Reducer>1)
 										Reducer--;
 								}
 							} else
 								AnimPhase = 2;
-
+								
 							break;
 					case 2 :
 							svg.selectAll(".segment")
@@ -433,21 +441,21 @@ function FadeInTheme() {
 							break;
 				}
 
-
-/*
+				
+/*					
 				svg.selectAll(".segment")
 					.data(topojson.feature(worldData, worldData.objects.countries).features)
 					.attr("class", "segment")
 					.attr("d", path)
 					.style("fill", (d, i) => GetRandomColor())
-*/
+*/					
 			}
 
 
 			function SecondsSince1970()
 			{
 				var currentTime = new Date();
-
+				
 				return Math.floor(currentTime.getTime()/1000);
 			}
 
@@ -456,9 +464,8 @@ function FadeInTheme() {
 				console.log(ip)
 				var IP_To_LatLongService = "https://stglogin.taskstream.com/ip-map/?ip=" + ip
 				var DataJson, locationForMap;
-
-				console.log(IP_To_LatLongService)
-
+				
+				
 				  var xhttp = new XMLHttpRequest();
 				  xhttp.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
@@ -470,7 +477,7 @@ function FadeInTheme() {
 							console.log("Mappingproblem:" + this.responseText)
 							return;
 						}
-						console.log(DataJson)
+			
 						locationForMap = new Array();
 						locationForMap.latitude =  DataJson.Lat;
 						locationForMap.longitude =  DataJson.Long;
@@ -480,19 +487,28 @@ function FadeInTheme() {
 				  xhttp.open("GET", IP_To_LatLongService, true);
 				  xhttp.send();
  		    }
-
-
+			
+			
+			var bFirstTime = 1;
+	
 			function fetchNewIPs()
 			{
-				var AWS_GetNew_IP_Endpoint = 'https://u4uujrathb.execute-api.us-east-2.amazonaws.com/test/newtest?sincetime=' + (SecondsSince1970()-100000);
+				var AWS_GetNew_IP_Endpoint = 'https://u4uujrathb.execute-api.us-east-2.amazonaws.com/test/newtest?sincetime=';
 				var DataJson;
-
+				
+				if (bFirstTime) {
+					AWS_GetNew_IP_Endpoint += (SecondsSince1970()-100000);
+				} else {
+					AWS_GetNew_IP_Endpoint += SecondsSince1970();
+				}
+				bFirstTime = 0;
+				
 				  var xhttp = new XMLHttpRequest();
 				  xhttp.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
 						try {
 							DataJson = JSON.parse(this.responseText)
-
+							
 							for (var i=0; i<DataJson.Items.length; i++)
 								LatLong = ConvertFromIP(DataJson.Items[i].ip.S);
 						}
@@ -507,26 +523,26 @@ function FadeInTheme() {
 				  xhttp.open("GET", AWS_GetNew_IP_Endpoint, true);
 				  xhttp.send();
 			}
+			
 
-
-
+			
 			function GetLogins()
-			{
+			{				
 				if (AnimPhase<2) return;
-
+				
 				fetchNewIPs();
 		return;
-
+				
 				x.AnimCycle = 1;
 				x.r = 1;
 				x.ticks = 0;
 				x.direction = 1;
 				locations.push(x);
 			}
-
-
-
+			
+			
+				
         </script>
-
+		
     </body>
 </html>
