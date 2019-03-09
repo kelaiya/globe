@@ -16,8 +16,8 @@ body {  margins: 0px; }
 		
 <script>
 </script>		
-        <script src="d3.v4.min.js"></script>
-        <script src="topojson.v1.min.js"></script>
+        <script src="js/d3.v4.min.js"></script>
+        <script src="js/topojson.v1.min.js"></script>
         <script>
 			var debug = 0;
 			var gCurrentView;
@@ -49,7 +49,7 @@ body {  margins: 0px; }
             const center = [width/2, window.innerHeight/2];
 
 
-var audio = new Audio('theme.mp3');
+var audio = new Audio('snd/theme.mp3');
 var NewVolume = 0.05;
 audio.load();
 
@@ -110,6 +110,12 @@ function FadeInTheme() {
 				
 			function SkipDemo()
 			{
+				debug=1;
+				
+				Scale = 280;
+				AnimPhase = 2;
+				config.speed = .005;
+			  
 				audio.volume = NewVolume;
 				drawGraticule();
 				drawGlobe();
@@ -137,7 +143,8 @@ function FadeInTheme() {
 			function loadData()
 			{
 			// REQUEST DATA
-				d3.json('https://gist.githubusercontent.com/mbostock/4090846/raw/d534aba169207548a8a3d670c9c2cc719ff05c47/world-110m.json', function(err, json) {
+			//https://gist.githubusercontent.com/mbostock/4090846/raw/d534aba169207548a8a3d670c9c2cc719ff05c47/
+				d3.json('data/world-110m.json', function(err, json) {
 				  worldData = json;
 				})
 
@@ -147,7 +154,7 @@ function FadeInTheme() {
 				})
 */
 
-				d3.json("topo.json", function(error, topo) {
+				d3.json("data/topo.json", function(error, topo) {
 					ocean = topojson.feature(topo, topo.objects.ocean)
 				})
 			}
@@ -261,9 +268,35 @@ function FadeInTheme() {
                 markers
                     .enter().append("image")
                     .merge(markers)
-					.attr("xlink:href", "shiny2.gif")
-					.attr("width", 16)
-					.attr("height", 16)
+					.attr("xlink:href", function (d) {
+						return (d.platform.toLowerCase()=='lat') ? "i/testsphere.gif" : "i/shiny2.gif";
+					})
+					.attr("width", function(d) {
+						if (d.AnimCycle==1) {
+//							console.log(d)
+							d.r += d.direction;
+							if (d.ticks==21)
+								d.direction = -d.direction;
+							if (d.ticks==39)
+								d.AnimCycle++;
+							d.ticks++;
+							return d.r;
+						} else 
+							return d.r;
+						})
+					.attr("height", function (d) {
+						if (d.AnimCycle==1) {
+//							console.log(d)
+							d.r += d.direction;
+							if (d.ticks==21)
+								d.direction = -d.direction;
+							if (d.ticks==39)
+								d.AnimCycle++;
+							d.ticks++;
+							return d.r;
+						} else 
+							return d.r;
+						})
                     .attr('x', d => projection([d.longitude, d.latitude])[0])
                     .attr('y', d => projection([d.longitude, d.latitude])[1])
 					.style("opacity", function(d) {
@@ -459,7 +492,7 @@ function FadeInTheme() {
 				return Math.floor(currentTime.getTime()/1000);
 			}
 
-			function ConvertFromIP(ip)
+			function ConvertFromIPAndPushOntoMap(ip, platform)
 			{
 				console.log(ip)
 				var IP_To_LatLongService = "https://stglogin.taskstream.com/ip-map/?ip=" + ip
@@ -481,6 +514,14 @@ function FadeInTheme() {
 						locationForMap = new Array();
 						locationForMap.latitude =  DataJson.Lat;
 						locationForMap.longitude =  DataJson.Long;
+						locationForMap.platform = platform;
+						
+						locationForMap.AnimCycle = 1;
+						locationForMap.r = 6;
+						locationForMap.ticks = 0;
+						locationForMap.direction = 1;
+
+						
 						locations.push(locationForMap);
 					}
 				  };
@@ -509,8 +550,10 @@ function FadeInTheme() {
 						try {
 							DataJson = JSON.parse(this.responseText)
 							
+							console.log(DataJson);
+							
 							for (var i=0; i<DataJson.Items.length; i++)
-								LatLong = ConvertFromIP(DataJson.Items[i].ip.S);
+								LatLong = ConvertFromIPAndPushOntoMap(DataJson.Items[i].ip.S, DataJson.Items[i].platform.S);
 						}
 						catch (err)
 						{
@@ -531,13 +574,6 @@ function FadeInTheme() {
 				if (AnimPhase<2) return;
 				
 				fetchNewIPs();
-		return;
-				
-				x.AnimCycle = 1;
-				x.r = 1;
-				x.ticks = 0;
-				x.direction = 1;
-				locations.push(x);
 			}
 			
 			
