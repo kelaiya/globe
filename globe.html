@@ -1,26 +1,28 @@
 
 <html>
 <style>
-body {  margins: 0px; }
+body {  margins: 0px; } 
 </style>
 
     <body bgcolor="#7f8b96" topmargin="0" leftmargin="0" >
-		<div id="buttons">
+		<div id="buttons"> 
 		<input type="button" value="start" id="start" onclick="StartDemo();document.getElementById('buttons').style.display='none'">&nbsp;
 		<input type="button" value="skip"  id="skip" onclick="SkipDemo();document.getElementById('buttons').style.display='none'">
-		<input type="button" value="Spin Fast"   onclick="config.speed *= 2">
 		</div>
+		<input type="button" value="Spin Fast"   onclick="config.speed *= 2">
+		<input type="button" value="debug" id="debugbutton2">
+		<input type="button" value="debug" id="debugbutton"><br>
 	<div align="center">
         <svg style="background: #7f8b96"></svg>
 	</div>
-
+		
 <script>
-</script>
+</script>		
         <script src="js/d3.v4.min.js"></script>
         <script src="js/topojson.v1.min.js"></script>
         <script>
 			var debug = 0;
-			var gCurrentView;
+			var gCurrentView, TrueRotation;
 			var LandColor = 255;
 			var ScaleChange = 0.985;
 			var showingGraticule = 0, showingOcean = 1;
@@ -30,20 +32,22 @@ body {  margins: 0px; }
 			var ocean;
             const width = window.innerWidth * 1;
             const height = window.innerHeight * 1;
-			var Scale = (debug) ? 280 : 1330;
+			var Scale = (debug) ? 280 : 4000;
           	const config = {
               speed: (debug) ? .005 : 1.3,
               verticalTilt: -20,
               horizontalTilt: 8
             }
             let locations = [];
+			let cloudlocations = [];
             const svg = d3.select('svg')
                 .attr('width', width).attr('height', height);
             const markerGroup = svg.append('g');
+            const cloudGroup = svg.append('g');
             var projection = d3.geoOrthographic()
 					.scale(330)
 					.translate([width/2, height/2-10]);
-
+					
             const initialScale = projection.scale();
             var path = d3.geoPath().projection(projection);
             const center = [width/2, window.innerHeight/2];
@@ -98,28 +102,50 @@ function FadeInTheme() {
 			var CountryColors = Array();
 
 			loadData();
-/*            setTimeout(function (){
+/*            setTimeout(function (){ 
 				drawGraticule();
 				drawGlobe();
-				enableRotation();
+				enableRotation();    
 			}, 200);
-*/
+*/			
 
 			if (debug)
 				setTimeout("SkipDemo()", 300);
-
+				
 			function SkipDemo()
 			{
+				var CloudType;
+				
 				debug=1;
-
-				Scale = 280;
-				AnimPhase = 2;
+				
+				Scale = 400;
+				AnimPhase = 3;
 				config.speed = .005;
 
+				
+				for (i=0; i<80; i++) {
+					var longitude = getRandomInt(360)-180;
+					var lat;
+					
+					if (i<20)
+						lat = -getRandomInt(35);		//southern hemisphere
+					else
+						lat = getRandomInt(75);			//northern hemisphere
+					
+					cloudItem = {'latitude' : lat, 'longitude' : longitude, 
+								width : getRandomInt(70)+20 }
+								
+					cloudItem.height = cloudItem.width/2;
+					CloudType = (getRandomInt(50)>25) ? 1 : 2;
+					cloudItem.cloudfilename = (CloudType==1) ? "i/cloud1.gif" : "i/cloud2.gif";
+					cloudItem.opacity = (CloudType==1) ? (random() * 0.3)+0.2 : (random() * 0.35)+0.2;
+					cloudlocations.push(cloudItem);
+				}
+			  
 				audio.volume = NewVolume;
 				drawGraticule();
 				drawGlobe();
-				enableRotation();
+				enableRotation();    
 
 				window.setInterval(update, 100);
 //				window.setInterval(GetLogins, 100);
@@ -129,17 +155,41 @@ function FadeInTheme() {
 			function StartDemo()
 			{
 				audio.volume = NewVolume;
+
+				fetchNewIPs();
+
+				for (i=0; i<80; i++) {
+					var longitude = getRandomInt(360)-180;
+					var lat;
+					
+					if (i<20)
+						lat = -getRandomInt(35);		//southern hemisphere
+					else
+						lat = getRandomInt(75);			//northern hemisphere
+					
+					cloudItem = {'latitude' : lat, 'longitude' : longitude, 
+								width : getRandomInt(70)+20 }
+								
+					cloudItem.height = cloudItem.width/2;
+					CloudType = (getRandomInt(50)>25) ? 1 : 2;
+					cloudItem.cloudfilename = (CloudType==1) ? "i/cloud1.gif" : "i/cloud2.gif";
+					cloudItem.opacity = (CloudType==1) ? (random() * 0.3)+0.2 : (random() * 0.35)+0.2;
+					cloudlocations.push(cloudItem);
+				}
+
+
+
 				if (!debug)
 					FadeInTheme();
 				drawGraticule();
 				drawGlobe();
-				enableRotation();
+				enableRotation();    
 
 				window.setInterval(update, 100);
-				window.setInterval(GetLogins, 500);
+				window.setInterval(GetLogins, 800);
 //				GetLogins();
 			}
-
+			
 			function loadData()
 			{
 			// REQUEST DATA
@@ -148,38 +198,56 @@ function FadeInTheme() {
 				  worldData = json;
 				})
 
-/*
-				d3.json('locations.json', function(err, json) {
-				  locations= [];
+
+			if (debug) {
+				d3.json('data/locations.json', function(err, json) {
+				  locations= json;
+				  for (var i = 0; i<locations.length; i++)
+					locations[i].r = 10;
 				})
-*/
+			}
+
 
 				d3.json("data/topo.json", function(error, topo) {
 					ocean = topojson.feature(topo, topo.objects.ocean)
 				})
 			}
-
+			
+			function RandomIPs()
+			{
+				for (var i = 0; i<30; i++) {
+					var x = new Array();
+				
+					x.r = 10;				
+					x.longitude = getRandomInt(360) - 180;
+					x.longitude = (i * 12) - 180;
+					x.latitude = i * 2;//getRandomInt(180) - 90;
+					x.platform = 'testdata';
+					locations.push(x)
+				}
+			}
+			
 			function GetRandomHex()
 			{
 				var num;
-
+				
 				num = Math.floor(Math.random() * 16);
 				return num.toString(16);
 			}
-
+			
 			function GetHex(val)
 			{
 				val = Math.floor(val);
 				return val.toString(16);
 			}
-
+			
 			function GetRandomColor()
 			{
 				return '#' + GetRandomHex() + GetRandomHex() + GetRandomHex();
 			}
 
 
-			function drawGlobe() {
+			function drawGlobe() {  
 				projection = d3.geoOrthographic()
 					.scale(Scale)
 					.translate([width/2, height/2-10]);
@@ -196,19 +264,19 @@ function FadeInTheme() {
 					.style("opacity", ".8")
 					.call(function(d){
 						var NumContinents = d._groups[0].length;
-
+						
 						for (var i=0; i<NumContinents; i++)
 							CountryColors[i] = [0, 128 + getRandomInt(40) - 20, 128 + getRandomInt(40) - 20, 128 + getRandomInt(40) - 20];
-
+							
 //						console.log(CountryColors);
 					});
-
+                   
             }
-
+			
             function drawGraticule() {
 				if (!showingGraticule)
 					return;
-
+					
                 const graticule = d3.geoGraticule()
                     .step([10, 10]);
 
@@ -231,38 +299,130 @@ function FadeInTheme() {
 
 					if (!lastElapsed)
 						lastElapsed = elapsed;
-
-					distanceRotated += (config.speed * (elapsed - lastElapsed));
+						
+					distanceRotated += (config.speed * (elapsed - lastElapsed));	
 					lastElapsed = elapsed;
-					//elapsed
+					//elapsed					
 
+//					distanceRotated = 250;
 //					console.log((distanceRotated - 600) % 360)
 					gCurrentView = (distanceRotated) % 360;
-
-                    projection.rotate([(distanceRotated - 600) % 360, config.verticalTilt, config.horizontalTilt]);
+					TrueRotation = (distanceRotated - 600) % 360;
+					
+					
+//                    projection.rotate([(distanceRotated - 600) % 360, config.verticalTilt, config.horizontalTilt]);
+					
+                    projection.rotate([TrueRotation, config.verticalTilt, config.horizontalTilt]);
                     svg.selectAll("path").attr("d", path);
-
+					
                     drawMarkers();
+					drawClouds();
                 });
-            }
-
+            }        
+			
 			function random()
 			{
 				return Math.random();
 			}
-
+			
 			function getRandomInt(Range)
 			{
 				return Math.floor(Math.random()*Range);
 			}
-
-            function drawMarkers() {
-				if (AnimPhase<2) return;
-
+			
+			
+			var calls = 0;
+			
+			
+			function drawClouds()
+			{
 				RealCurrentView = 360-gCurrentView - 180 + 60;
 				RealCurrentView = (RealCurrentView + 360) % 360;
 //				console.log(RealCurrentView);
 
+                const clouds = cloudGroup.selectAll('.clouds')
+                    .data(cloudlocations);
+
+				var RealScale = (Scale/400);
+				
+//				document.getElementById('debugbutton').value = RealScale;
+				
+				if (RealScale>1.2)
+					RealScale = RealScale * (RealScale) * 0.6;
+				else
+					RealScale = RealScale * (RealScale) * 0.9
+				
+					
+                clouds
+                    .enter().append("image")
+                    .merge(clouds)
+					.attr("xlink:href", function (d) {
+						return d.cloudfilename;
+					})
+					.attr("class", "clouds")
+					.attr("width", function(d,i) {
+							return d.width * RealScale;
+						})
+					.attr("height", function (d,i) {
+							return d.height * RealScale;
+						})
+                    .attr('x', (d,i) => projection([d.longitude, d.latitude])[0]-cloudlocations[i].width/2)
+                    .attr('y', (d,i) => projection([d.longitude, d.latitude])[1]-cloudlocations[i].height/2)
+					.style("opacity", function(d) {
+						var DataLongitude;
+
+
+
+						if (Math.abs(d.longitude)<90 && Math.abs(RealCurrentView-270)>180) {
+//							console.log('special!')
+							//special case:
+							if (RealCurrentView>270)
+								RealCurrentView -= 360;
+							
+							if (Math.abs(d.longitude - RealCurrentView)<75)
+								return d.opacity;
+							return 0;
+						}
+
+
+						if ((Math.abs(d.longitude)<90) && (Math.abs(RealCurrentView-270)>180)) {
+//							console.log('special!')
+							//special case:
+							if (RealCurrentView>270)
+								RealCurrentView -= 360;
+							
+							if (Math.abs(d.longitude - RealCurrentView)<75)
+								return d.opacity;
+							return 0;
+						}
+						
+
+						DataLongitude = ((d.longitude + 360) % 360);
+						PositiveRealCurrentView = (RealCurrentView+360) % 360;
+
+						if (Math.abs(DataLongitude - PositiveRealCurrentView)<75)
+							return d.opacity;
+						return 0;						
+
+					})
+
+//				locations.push( {"longitude" : random()*360-180, "latitude" : random()*180 - 90} );
+
+				
+                cloudGroup.each(function () {
+                    this.parentNode.appendChild(this);
+                });
+			}
+			
+			var calls = 0;
+
+            function drawMarkers() {
+				if (AnimPhase<3) return;
+				
+				RealCurrentView = 360-gCurrentView - 180 + 60;
+				RealCurrentView = (RealCurrentView + 360) % 360;
+//				console.log(RealCurrentView);
+				
                 const markers = markerGroup.selectAll('image')
                     .data(locations);
                 markers
@@ -273,7 +433,7 @@ function FadeInTheme() {
 					})
 					.attr("width", function(d) {
 						if (d.AnimCycle==1) {
-//						console.log(d)
+//							console.log(d)
 							d.r += d.direction;
 							if (d.ticks==21)
 								d.direction = -d.direction;
@@ -281,7 +441,7 @@ function FadeInTheme() {
 								d.AnimCycle++;
 							d.ticks++;
 							return d.r;
-						} else
+						} else 
 							return d.r;
 						})
 					.attr("height", function (d) {
@@ -294,110 +454,94 @@ function FadeInTheme() {
 								d.AnimCycle++;
 							d.ticks++;
 							return d.r;
-						} else
+						} else 
 							return d.r;
 						})
                     .attr('x', d => projection([d.longitude, d.latitude])[0])
                     .attr('y', d => projection([d.longitude, d.latitude])[1])
-					.style("opacity", function(d) {
-						var DataLongitude;
+					.style("opacity", function(d, i) {
+						var DataLongitude, PositiveRealCurrentView;
 
-						if (Math.abs(d.longitude)<90) {
+						if (d.longitude>=0 && d.longitude<180) {
+							if (RealCurrentView>270)
+								RealCurrentView -= 360;
+							
+//							document.getElementById('debugbutton').value = RealCurrentView;
+//							document.getElementById('debugbutton2').value = (Math.abs(d.longitude - RealCurrentView));
+							
+							if (Math.abs(d.longitude - RealCurrentView)<90)
+								return d.opacity;
+
+							return 0;
+						}
+						
+/*						
+							if (calls<50) {
+								calls++;
+								console.log(i + ',' + d.longitude + ',' + Math.abs(d.longitude - RealCurrentView) )
+							}
+*/						
+						if ((Math.abs(d.longitude)<90) && (Math.abs(RealCurrentView-270)>180)) {
+//							console.log('special!')
 							//special case:
 							if (RealCurrentView>270)
 								RealCurrentView -= 360;
-
+							
 							if (Math.abs(d.longitude - RealCurrentView)<90)
 								return 1.0;
 							return 0.1;
 						}
 
+
 						DataLongitude = ((d.longitude + 360) % 360);
-						if (Math.abs(DataLongitude - RealCurrentView)<90)
+						PositiveRealCurrentView = (RealCurrentView+360) % 360;
+
+						if (Math.abs(DataLongitude - PositiveRealCurrentView)<90)
 							return 1.0;
 						return 0.1;
 					})
 
 //				locations.push( {"longitude" : random()*360-180, "latitude" : random()*180 - 90} );
 
-
+				
                 markerGroup.each(function () {
                     this.parentNode.appendChild(this);
                 });
-
+				
             }
 
 
 
 
-/*
-            function drawMarkers() {
-				if (AnimPhase<2) return;
-
-                const markers = markerGroup.selectAll('circle')
-                    .data(locations);
-                markers
-                    .enter()
-                    .append('circle')
-                    .merge(markers)
-                    .attr('cx', d => projection([d.longitude, d.latitude])[0])
-                    .attr('cy', d => projection([d.longitude, d.latitude])[1])
-                    .attr('fill', (d, i) => {
-                        const coordinate = [d.longitude, d.latitude];
-                        gdistance = d3.geoDistance(coordinate, projection.invert(center));
-                        return gdistance > 1.57 ? 'none' : GetRandomColor();
-                    })
-                    .attr('r', (d,i) => {
-						if (d.AnimCycle==1) {
-//							console.log(d)
-							d.r += d.direction;
-							if (d.ticks==20)
-								d.direction = -d.direction;
-							if (d.ticks==38)
-								d.AnimCycle++;
-							d.ticks++;
-							return d.r;
-						} else
-							return d.r;
-					});
-
-
-//				locations.push( {"longitude" : random()*360-180, "latitude" : random()*180 - 90} );
-
-                markerGroup.each(function () {
-                    this.parentNode.appendChild(this);
-                });
-            }
-*/
-
+			
 			function GetLandColor()
 			{
 				var H = GetHex(LandColor);
-
+				
 				return "#" + H + H + H;
 			}
-
+			
 			function GetGraticuleColor()
 			{
 				var H = GetHex(Math.floor(255 - (255-LandColor)/3));
-
+				
 				return "#" + H + H + H;
 			}
-
+			
 			function ComputeFinalCountryColor(c)
 			{
 				var Transition = c[0];
 				var R, G, B;
-
+				
 				if (c[0]<.99)
 					c[0] += 0.02;
-
+					
 				R = 128 * (1.0 - Transition) + Transition * c[1];
 				G = 128 * (1.0 - Transition) + Transition * c[2];
 				B = 128 * (1.0 - Transition) + Transition * c[3];
 				return "#" + GetHex(R) + GetHex(G) + GetHex(B);
 			}
-
+			
 			function update()
 			{
                 const graticule = d3.geoGraticule()
@@ -408,7 +552,7 @@ function FadeInTheme() {
 					.translate([width/2, height/2-10]);
 				path = d3.geoPath().projection(projection);
 
-				if (Scale>450) {
+				if (Scale>400) {
 					Scale *= ScaleChange;
 					if (ScaleChange<0.996)
 						ScaleChange *= 1.00005;
@@ -418,13 +562,13 @@ function FadeInTheme() {
                     .datum(graticule)
                     .attr("d", path)
                     .style("stroke", GetGraticuleColor())
-*/
+*/		
 				if (showingOcean) {
 					var R, G, B, OceanColor;
-
+					
 					if (OceanIntensity<1.0)
 						OceanIntensity += 0.003;
-
+						
 					R = 255 * (1.0-OceanIntensity) + 127 * OceanIntensity;
 					G = 255 * (1.0-OceanIntensity) + 178 * OceanIntensity;
 					B = 255 * (1.0-OceanIntensity) + 224 * OceanIntensity;
@@ -440,7 +584,7 @@ function FadeInTheme() {
 						.style("fill", OceanColor)
 
 				}
-
+					
 				switch (AnimPhase) {
 					case 1 :
 							svg.selectAll(".segment")
@@ -449,22 +593,29 @@ function FadeInTheme() {
 								.style("stroke", "#fff")
 								.attr("d", path)
 								.style("fill", (d, i) => GetLandColor())
-
+							
 							ticks++;
 							ticks %= Reducer;
-
+							
 							if (LandColor>128) {
 								if (!ticks || Reducer==1) {
 									LandColor -= 1;
-
+									
 									if (Reducer>1)
 										Reducer--;
 								}
-							} else
+							} else {
 								AnimPhase = 2;
-
+							}
+								
 							break;
 					case 2 :
+							document.getElementById('debugbutton').value = Scale;
+							
+							if (Scale<=440)
+								AnimPhase = 3;
+							break;
+					case 3 :
 							svg.selectAll(".segment")
 								.data(topojson.feature(worldData, worldData.objects.countries).features)
 								.attr("class", "segment")
@@ -474,21 +625,21 @@ function FadeInTheme() {
 							break;
 				}
 
-
-/*
+				
+/*					
 				svg.selectAll(".segment")
 					.data(topojson.feature(worldData, worldData.objects.countries).features)
 					.attr("class", "segment")
 					.attr("d", path)
 					.style("fill", (d, i) => GetRandomColor())
-*/
+*/					
 			}
 
 
 			function SecondsSince1970()
 			{
 				var currentTime = new Date();
-
+				
 				return Math.floor(currentTime.getTime()/1000);
 			}
 
@@ -497,8 +648,8 @@ function FadeInTheme() {
 				console.log(ip)
 				var IP_To_LatLongService = "https://stglogin.taskstream.com/ip-map/?ip=" + ip
 				var DataJson, locationForMap;
-
-
+				
+				
 				  var xhttp = new XMLHttpRequest();
 				  xhttp.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
@@ -510,48 +661,48 @@ function FadeInTheme() {
 							console.log("Mappingproblem:" + this.responseText)
 							return;
 						}
-
+			
 						locationForMap = new Array();
 						locationForMap.latitude =  DataJson.Lat;
 						locationForMap.longitude =  DataJson.Long;
 						locationForMap.platform = platform;
-
+						
 						locationForMap.AnimCycle = 1;
 						locationForMap.r = 6;
 						locationForMap.ticks = 0;
 						locationForMap.direction = 1;
 
-
+						
 						locations.push(locationForMap);
 					}
 				  };
 				  xhttp.open("GET", IP_To_LatLongService, true);
 				  xhttp.send();
  		    }
-
-
+			
+			
 			var bFirstTime = 1;
-
+	
 			function fetchNewIPs()
 			{
 				var AWS_GetNew_IP_Endpoint = 'https://u4uujrathb.execute-api.us-east-2.amazonaws.com/test/newtest?sincetime=';
 				var DataJson;
-
+				
 				if (bFirstTime) {
-					AWS_GetNew_IP_Endpoint += (SecondsSince1970()-100000);
+					AWS_GetNew_IP_Endpoint += (SecondsSince1970()-50);	//only 1 hour
 				} else {
 					AWS_GetNew_IP_Endpoint += SecondsSince1970();
 				}
 				bFirstTime = 0;
-
+				
 				  var xhttp = new XMLHttpRequest();
 				  xhttp.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
 						try {
 							DataJson = JSON.parse(this.responseText)
-
+							
 							console.log(DataJson);
-
+							
 							for (var i=0; i<DataJson.Items.length; i++)
 								LatLong = ConvertFromIPAndPushOntoMap(DataJson.Items[i].ip.S, DataJson.Items[i].platform.S);
 						}
@@ -566,19 +717,22 @@ function FadeInTheme() {
 				  xhttp.open("GET", AWS_GetNew_IP_Endpoint, true);
 				  xhttp.send();
 			}
+			
 
-
-
+			
 			function GetLogins()
-			{
-				if (AnimPhase<2) return;
+			{				
+				if (AnimPhase<3) return;
+		
+				if (debug)
+					RandomIPs();
 
 				fetchNewIPs();
 			}
-
-
-
+			
+			
+				
         </script>
-
+		
     </body>
 </html>
