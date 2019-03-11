@@ -21,7 +21,7 @@ body {  margins: 0px; }
         <script src="js/d3.v4.min.js"></script>
         <script src="js/topojson.v1.min.js"></script>
         <script>
-			const FinalScale = 320;
+			const FinalScale = 340;
 			var debug = 0;
 			var gCurrentView, TrueRotation;
 			var LandColor = 255;
@@ -63,12 +63,13 @@ var gID = 0;
 
 function FadeOut()
 {
-	if (NewVolume<.002) {
+	if (NewVolume<.0015) {
+		audio.volume = 0;
 		clearInterval(gID);
 		return;
 	}
 
-	NewVolume -= 0.0006;
+	NewVolume -= 0.00067;
 	audio.volume = NewVolume;
 
 //	console.log(NewVolume);
