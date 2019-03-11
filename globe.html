@@ -21,6 +21,7 @@ body {  margins: 0px; }
         <script src="js/d3.v4.min.js"></script>
         <script src="js/topojson.v1.min.js"></script>
         <script>
+			const FinalScale = 320;
 			var debug = 0;
 			var gCurrentView, TrueRotation;
 			var LandColor = 255;
@@ -32,7 +33,7 @@ body {  margins: 0px; }
 			var ocean;
             const width = window.innerWidth * 1;
             const height = window.innerHeight * 1;
-			var Scale = (debug) ? 280 : 8000;
+			var Scale = (debug) ? FinalScale : 8000;
           	const config = {
               speed: (debug) ? .005 : 1.3,
               verticalTilt: -20,
@@ -54,7 +55,7 @@ body {  margins: 0px; }
 
 
 var audio = new Audio('snd/theme.mp3');
-var NewVolume = 0.05;
+var NewVolume = 0.01;
 audio.load();
 
 
@@ -67,7 +68,7 @@ function FadeOut()
 		return;
 	}
 
-	NewVolume -= 0.0007;
+	NewVolume -= 0.0006;
 	audio.volume = NewVolume;
 
 //	console.log(NewVolume);
@@ -82,7 +83,7 @@ function StartFadeOut()
 
 function FadeIn()
 {
-	if (NewVolume>0.4) {
+	if (NewVolume>0.6) {
 		clearInterval(gID);
 		return;
 	}
@@ -119,7 +120,7 @@ function FadeInTheme() {
 				debug=1;
 				
 				document.getElementById('svgObjId').style.display = '';
-				Scale = 400;
+				Scale = FinalScale;
 				AnimPhase = 3;
 				config.speed = .005;
 
@@ -165,15 +166,17 @@ function FadeInTheme() {
 				
 				iFrame.width = width;
 				iFrame.height = height;
-//				iFrame.style.display = '';
-				setTimeout("StartDemoPart2()", 500)
-				
-				setTimeout("AnimPhase=1", 16000)
-				setTimeout("TripFadeout()", 17000)
+				iFrame.style.display = '';
 			}
 
 			function StartDemoPart2()
 			{
+				var iFrame = document.getElementById('spaceId');
+				iFrame.style.display = 'none';
+
+				setTimeout("AnimPhase=1", 24000)
+				setTimeout("TripFadeout()", 24000)
+
 				audio.volume = NewVolume;
 
 				document.getElementById('svgObjId').style.display = '';
@@ -259,7 +262,9 @@ function FadeInTheme() {
 			function GetHex(val)
 			{
 				val = Math.floor(val);
-				return val.toString(16);
+				var H = val.toString(16);
+				if (H.length<2) return "0" + H;
+				return H;
 			}
 			
 			function GetRandomColor()
@@ -364,7 +369,7 @@ function FadeInTheme() {
                 const clouds = cloudGroup.selectAll('.clouds')
                     .data(cloudlocations);
 
-				var RealScale = (Scale/400);
+				var RealScale = (Scale/FinalScale);
 				
 //				document.getElementById('debugbutton').value = RealScale;
 				
@@ -579,7 +584,7 @@ function FadeInTheme() {
 					.translate([width/2, height/2-10]);
 				path = d3.geoPath().projection(projection);
 
-				if (Scale>400) {
+				if (Scale>FinalScale) {
 					Scale *= ScaleChange;
 						if (ScaleChange<0.996) {
 							ScaleChange *= 1.000000004;
@@ -780,6 +785,6 @@ function FadeInTheme() {
 				
         </script>
 		
-		<iframe src="space.html" height=100 width=100 id="spaceId" style="display:none">
+		<iframe src="space.html" height=100 width=100 id="spaceId" style="display:none" frameBorder="0">
     </body>
 </html>

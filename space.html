@@ -9,10 +9,10 @@
 }
 </style>
 
-	<br>
+	<input type="button" value="Start" onclick="this.style.display='none';StartDemoSpace()">
 	<div id="centerPoint" 
 		class="child"
-		style="color:red; background-color:white; width:1280px; display:block;">
+		style="color:red; background-color:white; width:900; display:block;">
 		<div id="forPixi">
 	</div>
 	<script src="js/pixi.js"></script>
@@ -20,8 +20,12 @@
 <script>
 	
 
+var audio = new Audio('snd/space2.mp3');
+var NewVolume = 0.2;
+audio.load();
 
-		var renderer = PIXI.autoDetectRenderer(1280, 720,{backgroundColor : 0x000428});
+//		var renderer = PIXI.autoDetectRenderer(1280, 720,{backgroundColor : 0x000428});
+		var renderer = PIXI.autoDetectRenderer(1070, 680,{backgroundColor : 0x000428});
 		document.getElementById('forPixi').appendChild(renderer.view);
 
 		// create the root of the scene graph
@@ -73,7 +77,8 @@ function animate() {
 			
 //			SpinningBunnies[i].Vy += gravity;
 			
-//			SpinningBunnies[i].position.y += SpinningBunnies[i].Vy;
+			SpinningBunnies[i].position.y += SpinningBunnies[i].Vx;
+			SpinningBunnies[i].position.x += SpinningBunnies[i].Vy;
 			
 			SpinningBunnies[i].scale.x *= 1.03;
 			SpinningBunnies[i].scale.y *= 1.03;
@@ -97,7 +102,55 @@ document.onmousemove = function(e){
     cursorY = e.pageY;
 }
 
-var calls = 0;
+function getRandomInt(Range)
+{
+	return Math.floor(Math.random()*Range);
+}
+
+
+var calls = 0, ticks = 0;
+var Frequency = 300;
+var t, FadeID, gID;
+
+function RandomStar()
+{
+	// create a new Sprite using the texture
+	var magicbunny 
+
+	if (t>0.85) return;
+	
+calls++;
+
+	if (calls % Frequency ==0) {
+	
+		ticks++;
+		
+		magicbunny = new PIXI.Sprite((ticks %2==0) ? Star1 : Star2);
+
+		// center the sprite's anchor point
+		magicbunny.anchor.x = 0.5;
+		magicbunny.anchor.y = 0.5;
+		magicbunny.alpha = 0.6;
+
+		// move the sprite to the center of the screen
+		magicbunny.position.x = getRandomInt(1000) + 200;
+		magicbunny.position.y = getRandomInt(550) + 100;
+		
+		magicbunny.Vx = Math.random() * 4 - 2;
+		magicbunny.Vy = Math.random() * 4 - 2;
+		
+		magicbunny.scale.x = .1;
+		magicbunny.scale.y = .1;
+
+		stage.addChild(magicbunny);
+		
+		SpinningBunnies.push(magicbunny);
+		
+		if (Frequency>20)
+			Frequency -= 10;
+	}
+}
+
 
 document.onmousedown = function(e){
 	// create a new Sprite using the texture
@@ -124,6 +177,74 @@ calls++;
 
 function key(event)
 {
+}
+
+function GetHex(val)
+{
+	val = Math.floor(val);
+	var H = val.toString(16);
+	if (H.length<2) return "0" + H;
+	return H;
+}
+			
+var StartR = 0, StartG = 4./255., StartB = 40./255;
+var FinalR = 110./255., FinalG = 110./255., FinalB = 117./255.;
+
+function FadeBackground()
+{
+	var R, G, B, HexValue;
+
+	if (t>0.997) {
+		clearInterval(FadeID);
+		return;
+	}
+	R = StartR * (1.-t) + FinalR * t;
+	G = StartG * (1.-t) + FinalG * t;
+	B = StartB * (1.-t) + FinalB * t;
+
+	t += 0.005;
+	HexValue = "#" + GetHex(R * 255) + GetHex(G * 255) + GetHex(B * 255);
+	document.body.style.background = HexValue;
+	renderer.backgroundColor = PIXI.utils.rgb2hex ([R, G, B])
+}
+
+function FadeOut()
+{
+	if (NewVolume<.002) {
+		clearInterval(gID);
+		return;
+	}
+
+	NewVolume -= 0.0007;
+	audio.volume = NewVolume;
+
+//	console.log(NewVolume);
+}
+
+function StartFadeOut()
+{
+	gID = setInterval("FadeOut()", 20);
+}
+
+	
+function StartDemoSpace()
+{
+	audio.play();
+	audio.volume = NewVolume;
+	t = 0;
+	setInterval("RandomStar()", 10);
+	FadeID = setInterval("FadeBackground()", 100);
+	setTimeout("Transition()", 25000);
+//	setTimeout("Transition()", 250);
+	setTimeout("StartFadeOut()", 19000)
+}
+
+function Transition()
+{
+	clearInterval(FadeID);
+	audio.pause();
+	document.getElementById("centerPoint").style.display = 'none';
+	parent.StartDemoPart2();
 }
 	
 </script>
