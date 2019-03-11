@@ -1,0 +1,108 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>pixi.js example 1</title>
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+			background-color: #000000;
+		}
+	</style>
+	<script src="js/pixi.js"></script>
+</head>
+<body onkeydown="javascript:key(event);">
+
+	<script>
+
+var renderer = PIXI.autoDetectRenderer(800, 600,{backgroundColor : 0x1099bb});
+document.body.appendChild(renderer.view);
+
+// create the root of the scene graph
+var stage = new PIXI.Container();
+
+// create a texture from an image path
+var texture = PIXI.Texture.fromImage('assets/bunny.png');
+
+// create a new Sprite using the texture
+var bunny = new PIXI.Sprite(texture);
+
+// center the sprite's anchor point
+bunny.anchor.x = 0.5;
+bunny.anchor.y = 0.5;
+
+// move the sprite to the center of the screen
+bunny.position.x = 200;
+bunny.position.y = 150;
+
+//stage.addChild(bunny);
+
+// start animating
+
+var cursorX;
+var cursorY;
+
+var SpinningBunnies = new Array();
+
+animate();
+
+var gravity = 0.1;
+
+function animate() {
+	var i;
+	
+    requestAnimationFrame(animate);
+
+    // just for fun, let's rotate mr rabbit a little
+    bunny.rotation += 0.1;
+
+	if (SpinningBunnies)
+		for (i = 0; i<SpinningBunnies.length; i++) {
+			SpinningBunnies[i].rotation += 0.1;
+			
+			SpinningBunnies[i].Vy += gravity;
+			
+			SpinningBunnies[i].position.y += SpinningBunnies[i].Vy;
+			
+			SpinningBunnies[i].scale.x *= 1.02;
+			SpinningBunnies[i].scale.y *= 1.02;
+		}
+		
+    // render the container
+    renderer.render(stage);
+}
+
+
+document.onmousemove = function(e){
+    cursorX = e.pageX;
+    cursorY = e.pageY;
+}
+
+document.onmousedown = function(e){
+	// create a new Sprite using the texture
+	var magicbunny = new PIXI.Sprite(texture);
+
+	// center the sprite's anchor point
+	magicbunny.anchor.x = 0.5;
+	magicbunny.anchor.y = 0.5;
+
+	// move the sprite to the center of the screen
+	magicbunny.position.x = cursorX;
+	magicbunny.position.y = cursorY;
+	
+	magicbunny.Vy = 0;
+	magicbunny.curscale = 1;
+
+	stage.addChild(magicbunny);
+	
+	SpinningBunnies.push(magicbunny);
+}
+
+function key(event)
+{
+}
+
+	</script>
+
+	</body>
+</html>

@@ -1,6 +1,130 @@
-   <body bgcolor="#000428" topmargin="0" leftmargin="0" >
+<body bgcolor="#000428" topmargin="0" leftmargin="0" >
+
+<style>
+.child {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+</style>
+
+	<br>
+	<div id="centerPoint" 
+		class="child"
+		style="color:red; background-color:white; width:1280px; display:block;">
+		<div id="forPixi">
+	</div>
+	<script src="js/pixi.js"></script>
 
 <script>
+	
+
+
+		var renderer = PIXI.autoDetectRenderer(1280, 720,{backgroundColor : 0x000428});
+		document.getElementById('forPixi').appendChild(renderer.view);
+
+		// create the root of the scene graph
+		var stage = new PIXI.Container();
+
+		// create a texture from an image path
+		var Star1 = PIXI.Texture.fromImage('i/star1.gif');
+		var Star2 = PIXI.Texture.fromImage('i/star2.gif');
+
+		// create a new Sprite using the texture
+/*		var bunny = new PIXI.Sprite(texture);
+
+		// center the sprite's anchor point
+		bunny.anchor.x = 0.5;
+		bunny.anchor.y = 0.5;
+
+		// move the sprite to the center of the screen
+		bunny.position.x = 200;
+		bunny.position.y = 150;
+*/
+		//stage.addChild(bunny);
+
+		// start animating
+
+		var cursorX;
+		var cursorY;
+
+		var SpinningBunnies = new Array();
+
+		animate();
+
+	
+
+
+
+
+
+function animate() {
+	var i;
+	
+    requestAnimationFrame(animate);
+
+    // just for fun, let's rotate mr rabbit a little
+//    bunny.rotation += 0.1;
+
+	if (SpinningBunnies)
+		for (i = 0; i<SpinningBunnies.length; i++) {
+			SpinningBunnies[i].rotation += 0.03;
+			
+//			SpinningBunnies[i].Vy += gravity;
+			
+//			SpinningBunnies[i].position.y += SpinningBunnies[i].Vy;
+			
+			SpinningBunnies[i].scale.x *= 1.03;
+			SpinningBunnies[i].scale.y *= 1.03;
+			
+			SpinningBunnies[i].alpha *= 0.98;
+			
+			if (SpinningBunnies[i].alpha<0.05) {
+				stage.removeChild(SpinningBunnies[i]);
+				SpinningBunnies.splice(i,1);
+			}
+
+		}
+		
+    // render the container
+    renderer.render(stage);
+}
+
+
+document.onmousemove = function(e){
+    cursorX = e.pageX;
+    cursorY = e.pageY;
+}
+
+var calls = 0;
+
+document.onmousedown = function(e){
+	// create a new Sprite using the texture
+	var magicbunny = new PIXI.Sprite((calls %2==0) ? Star1 : Star2);
+
+calls++;
+	// center the sprite's anchor point
+	magicbunny.anchor.x = 0.5;
+	magicbunny.anchor.y = 0.5;
+	magicbunny.alpha = 0.6;
+
+	// move the sprite to the center of the screen
+	magicbunny.position.x = cursorX-650;
+	magicbunny.position.y = cursorY-90;
+	
+	magicbunny.Vy = 0;
+	magicbunny.scale.x = .1;
+	magicbunny.scale.y = .1;
+
+	stage.addChild(magicbunny);
+	
+	SpinningBunnies.push(magicbunny);
+}
+
+function key(event)
+{
+}
 	
 </script>
 
