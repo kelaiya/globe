@@ -21,7 +21,7 @@
 	
 
 var audio = new Audio('snd/space2.mp3');
-var NewVolume = 0.2;
+var NewVolume = 0.8;
 audio.load();
 
 //		var renderer = PIXI.autoDetectRenderer(1280, 720,{backgroundColor : 0x000428});
@@ -215,7 +215,7 @@ function FadeOut()
 		return;
 	}
 
-	NewVolume -= 0.0006;
+	NewVolume -= 0.003;
 	audio.volume = NewVolume;
 
 //	console.log(NewVolume);

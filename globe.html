@@ -63,8 +63,8 @@ var gID = 0;
 
 function FadeOut()
 {
-	if (NewVolume<.0015) {
-		audio.volume = 0;
+	if (NewVolume<.002) {
+//		audio.volume = 0;
 		clearInterval(gID);
 		return;
 	}
@@ -84,12 +84,12 @@ function StartFadeOut()
 
 function FadeIn()
 {
-	if (NewVolume>0.6) {
+	if (NewVolume>0.92) {
 		clearInterval(gID);
 		return;
 	}
 
-	NewVolume += 0.001;
+	NewVolume += 0.0009;
 	audio.volume = NewVolume;
 
 //	console.log(NewVolume);
